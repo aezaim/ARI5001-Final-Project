@@ -2,7 +2,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import heapq
 import numpy as np
-
+import tracemalloc
 def create_complex_city_graph():
     G = nx.DiGraph()
     edges = [ #edges for smaller problem
@@ -44,6 +44,7 @@ def heuristic(node, goal, positions):
     h = np.sqrt((positions[node][0] - positions[goal][0])**2 + (positions[node][1] - positions[goal][1])**2)
     return h
 def dijkstra(graph, start, goal, positions, annotate):
+    tracemalloc.start()
     open_set = []
     heapq.heappush(open_set, (0, start))
     came_from = {}
@@ -65,10 +66,13 @@ def dijkstra(graph, start, goal, positions, annotate):
                 came_from[neighbor] = current
                 annotate[neighbor]['dijkstra'] = new_cost
                 print(f"Updated Dijkstra path to {neighbor}, cost {new_cost}")
-
+    current, peak = tracemalloc.get_traced_memory()
+    print(f"Dijkstra memory usage: Current = {current} bytes, Peak = {peak} bytes")
+    tracemalloc.stop()
     return came_from
 
 def a_star(graph, start, goal, positions, annotate):
+    tracemalloc.start()
     open_set = []
     heapq.heappush(open_set, (0 + heuristic(start, goal, positions), 0, start))
     came_from = {}
@@ -92,7 +96,9 @@ def a_star(graph, start, goal, positions, annotate):
                 came_from[neighbor] = current
                 annotate[neighbor]['a_star'] = new_cost
                 print(f"Updated A* path to {neighbor}, g-score {new_cost}, h-score {h_value}")
-
+    current, peak = tracemalloc.get_traced_memory()
+    print(f"Dijkstra memory usage: Current = {current} bytes, Peak = {peak} bytes")
+    tracemalloc.stop()
     return came_from
 positions = { #positions for smaller problem
     'A': (0, 0), 'B': (1, 2), 'C': (2, 4), 'D': (3, 1),
